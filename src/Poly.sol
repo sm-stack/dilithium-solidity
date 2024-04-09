@@ -3,6 +3,7 @@ pragma solidity 0.8.25;
 
 import "./Constants.sol";
 import "./Reduce.sol";
+import {ntt as ntt_internal} from "./Ntt.sol";
 
 library Polynomials {
     struct Poly {
@@ -52,6 +53,12 @@ library Polynomials {
         for (uint i = 0; i < N; i++) {
             t.coeffs[i] = a.coeffs[i] << uint32(D);
         }
+        return t;
+    }
+
+    function ntt(Poly memory a) public pure returns (Poly memory) {
+        Poly memory t;
+        t.coeffs = ntt_internal(a.coeffs);
         return t;
     }
 }
