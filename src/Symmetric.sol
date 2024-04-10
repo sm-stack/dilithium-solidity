@@ -5,83 +5,55 @@ import "./Constants.sol";
 
 library Stream {
     struct State {
-        uint256 state;
+        bytes32 state;
     }
 
     function empty() public pure returns (State memory) {}
 
     function init(uint256 seed, uint16 nonce) public pure returns (State memory) {
-        return State(uint256(keccak256(abi.encodePacked(seed, nonce))));
+        return State(keccak256(abi.encodePacked(seed, nonce)));
     }
 
-    function absorb(State memory st, bytes memory input) public pure returns (State memory) {
-        st.state = uint256(keccak256(abi.encodePacked(st.state, input)));
-        return st;
+    function absorb(State memory st, bytes memory input) public pure {
+        st.state = keccak256(abi.encodePacked(st.state, input));
+    }
+
+    function squeeze_bytes(State memory st, uint256 len) public pure returns (bytes memory) {
+        bytes memory buf = new bytes(0);
+        while (len > 0) {
+            if (len < 32) {
+                bytes memory left = new bytes(len);
+                for (uint256 i = 0; i < len; i++) {
+                    left[i] = st.state[i];
+                }
+                buf = bytes.concat(buf, left);
+                len = 0;
+            } else {
+                buf = bytes.concat(buf, st.state);
+                len -= 32;
+            }
+            st.state = keccak256(abi.encodePacked(st.state));
+        }
+        return buf;
     }
 
     // n block = n * SHAKE128_RATE bytes
-    function s128_squeeze_nblocks(State memory st, uint256 nblocks) public pure returns (State memory, bytes memory) {
-        bytes memory buf = new bytes(SHAKE128_RATE * nblocks);
-        while (nblocks > 0) {
-            for (uint256 i = 0; i < SHAKE128_RATE; i++) {
-                for (uint256 j = 0; j < 8; j++) {
-                    if (st.state == 0) {
-                        st.state = uint256(keccak256(abi.encodePacked(st.state)));
-                    }
-                    buf[buf.length - 1 - i * 8 - j] = bytes1(uint8(st.state));
-                    st.state >>= 8;
-                }
-            }
-            nblocks -= 1;
-        }
-        return (st, buf);
+    function s128_squeeze_nblocks(State memory st, uint256 nblocks) public pure returns (bytes memory) {
+        return squeeze_bytes(st, SHAKE128_RATE * nblocks);
     }
 
     // 1 block = SHAKE128_RATE bytes
-    function s128_squeeze_block(State memory st) public pure returns (State memory, bytes memory) {
-        bytes memory buf = new bytes(SHAKE128_RATE);
-        for (uint256 i = 0; i < SHAKE128_RATE; i++) {
-            for (uint256 j = 0; j < 8; j++) {
-                if (st.state == 0) {
-                    st.state = uint256(keccak256(abi.encodePacked(st.state)));
-                }
-                buf[buf.length - 1 - i * 8 - j] = bytes1(uint8(st.state));
-                st.state >>= 8;
-            }
-        }
-        return (st, buf);
+    function s128_squeeze_block(State memory st) public pure returns (bytes memory) {
+        return squeeze_bytes(st, SHAKE128_RATE);
     }
 
     // n block = n * SHAKE256_RATE bytes
-    function s256_squeeze_nblocks(State memory st, uint256 nblocks) public pure returns (State memory, bytes memory) {
-        bytes memory buf = new bytes(SHAKE256_RATE * nblocks);
-        while (nblocks > 0) {
-            for (uint256 i = 0; i < SHAKE256_RATE; i++) {
-                for (uint256 j = 0; j < 8; j++) {
-                    if (st.state == 0) {
-                        st.state = uint256(keccak256(abi.encodePacked(st.state)));
-                    }
-                    buf[buf.length - 1 - i * 8 - j] = bytes1(uint8(st.state));
-                    st.state >>= 8;
-                }
-            }
-            nblocks -= 1;
-        }
-        return (st, buf);
+    function s256_squeeze_nblocks(State memory st, uint256 nblocks) public pure returns (bytes memory) {
+        return squeeze_bytes(st, SHAKE256_RATE * nblocks);
     }
 
     // 1 block = SHAKE256_RATE bytes
-    function s256_squeeze_block(State memory st) public pure returns (State memory, bytes memory) {
-        bytes memory buf = new bytes(SHAKE256_RATE);
-        for (uint256 i = 0; i < SHAKE256_RATE; i++) {
-            for (uint256 j = 0; j < 8; j++) {
-                if (st.state == 0) {
-                    st.state = uint256(keccak256(abi.encodePacked(st.state)));
-                }
-                buf[buf.length - 1 - i * 8 - j] = bytes1(uint8(st.state));
-                st.state >>= 8;
-            }
-        }
-        return (st, buf);
+    function s256_squeeze_block(State memory st) public pure returns (bytes memory) {
+        return squeeze_bytes(st, SHAKE256_RATE);
     }
 }

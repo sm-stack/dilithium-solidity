@@ -5,24 +5,8 @@ import "forge-std/Test.sol";
 import "../src/Constants.sol";
 import "../src/Ntt.sol";
 
-contract Ntt {
-    function ntt_internal(int32[N] memory a) public pure returns (int32[N] memory) {
-        return ntt(a);
-    }
-
-    function invntt_internal(int32[N] memory a) public pure returns (int32[N] memory) {
-        return invntt(a);
-    }
-}
-
 contract NttTest is Test {
-    Ntt NTT;
-
-    function setUp() public {
-        NTT = new Ntt();
-    }
-
-    function test_invntt() public view {
+    function test_invntt() public pure {
         int32[N] memory a = [
             int32(-410121),
             -3439227,
@@ -541,14 +525,14 @@ contract NttTest is Test {
             3708051
         ];
 
-        int32[N] memory result = NTT.invntt_internal(a);
+        invntt(a);
 
         for (uint256 i = 0; i < N; i++) {
-            assertEq(result[i], aExpected[i]);
+            assertEq(a[i], aExpected[i]);
         }
     }
 
-    function test_ntt() public view {
+    function test_ntt() public pure {
         int32[N] memory a = [
             int32(-1),
             1,
@@ -1067,10 +1051,10 @@ contract NttTest is Test {
             314971
         ];
 
-        int32[N] memory result = NTT.ntt_internal(a);
+        ntt(a);
 
         for (uint256 i = 0; i < N; i++) {
-            assertEq(result[i], aExpected[i]);
+            assertEq(a[i], aExpected[i]);
         }
     }
 }

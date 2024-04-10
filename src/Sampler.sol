@@ -3,10 +3,7 @@ pragma solidity 0.8.25;
 
 import "./Constants.sol";
 
-function rej_uniform(int32[] memory a, uint256 len, bytes memory buf, uint256 buflen)
-    pure
-    returns (int32[] memory, uint256)
-{
+function rej_uniform(int32[] memory a, uint256 len, bytes memory buf, uint256 buflen) pure returns (uint256) {
     uint256 ctr = 0;
     uint256 pos = 0;
     uint32 t = 0;
@@ -26,5 +23,5 @@ function rej_uniform(int32[] memory a, uint256 len, bytes memory buf, uint256 bu
         }
     }
 
-    return (a, ctr);
+    return (ctr);
 }
