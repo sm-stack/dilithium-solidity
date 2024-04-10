@@ -15,35 +15,31 @@ library Polynomial {
     }
 
     function reduce(Poly memory a) public pure returns (Poly memory) {
-        Poly memory t;
         for (uint256 i = 0; i < N; i++) {
-            t.coeffs[i] = reduce32(a.coeffs[i]);
+            a.coeffs[i] = reduce32(a.coeffs[i]);
         }
-        return t;
+        return a;
     }
 
     function caddq(Poly memory a) public pure returns (Poly memory) {
-        Poly memory t;
         for (uint256 i = 0; i < N; i++) {
-            t.coeffs[i] = caddq32(a.coeffs[i]);
+            a.coeffs[i] = caddq32(a.coeffs[i]);
         }
-        return t;
+        return a;
     }
 
     function add(Poly memory a, Poly memory b) public pure returns (Poly memory) {
-        Poly memory t;
         for (uint256 i = 0; i < N; i++) {
-            t.coeffs[i] = a.coeffs[i] + b.coeffs[i];
+            a.coeffs[i] = a.coeffs[i] + b.coeffs[i];
         }
-        return t;
+        return a;
     }
 
     function sub(Poly memory a, Poly memory b) public pure returns (Poly memory) {
-        Poly memory t;
         for (uint256 i = 0; i < N; i++) {
-            t.coeffs[i] = a.coeffs[i] - b.coeffs[i];
+            a.coeffs[i] = a.coeffs[i] - b.coeffs[i];
         }
-        return t;
+        return a;
     }
 
     function shiftl(Poly memory a) public pure returns (Poly memory) {
@@ -55,15 +51,13 @@ library Polynomial {
     }
 
     function ntt(Poly memory a) public pure returns (Poly memory) {
-        Poly memory t;
-        t.coeffs = ntt_internal(a.coeffs);
-        return t;
+        a.coeffs = ntt_internal(a.coeffs);
+        return a;
     }
 
     function invntt(Poly memory a) public pure returns (Poly memory) {
-        Poly memory t;
-        t.coeffs = invntt_internal(a.coeffs);
-        return t;
+        a.coeffs = invntt_internal(a.coeffs);
+        return a;
     }
 
     uint256 constant POLY_UNIFORM_NBLOCKS = (768 + STREAM128_BLOCKBYTES - 1) / STREAM128_BLOCKBYTES;
@@ -147,5 +141,12 @@ library Polynomial {
             a.coeffs[b] = 1 - 2 * int32(int64(signs & 1));
             signs >>= 1;
         }
+    }
+
+    function mpointwise(Poly memory c, Poly memory a, Poly memory b) public pure returns (Poly memory) {
+        for (uint256 i = 0; i < N; ++i) {
+            c.coeffs[i] = mreduce64(int64(a.coeffs[i]) * int64(b.coeffs[i]));
+        }
+        return c;
     }
 }
