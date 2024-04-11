@@ -11,15 +11,15 @@ library Stream {
     function empty() public pure returns (State memory) {}
 
     function init(uint256 seed, uint16 nonce) public pure returns (State memory) {
-        return State(keccak256(abi.encodePacked(seed, nonce)));
+        return State(keccak256(bytes.concat(bytes32(seed), bytes32(uint256(nonce)))));
     }
 
     function absorb(State memory st, bytes memory input) public pure {
-        st.state = keccak256(abi.encodePacked(st.state, input));
+        st.state = keccak256(bytes.concat(st.state, input));
     }
 
     function squeeze_bytes(State memory st, uint256 len) public pure returns (bytes memory) {
-        bytes memory buf = new bytes(0);
+        bytes memory buf;
         while (len > 0) {
             if (len < 32) {
                 bytes memory left = new bytes(len);
@@ -32,7 +32,7 @@ library Stream {
                 buf = bytes.concat(buf, st.state);
                 len -= 32;
             }
-            st.state = keccak256(abi.encodePacked(st.state));
+            st.state = keccak256(bytes.concat(st.state));
         }
         return buf;
     }

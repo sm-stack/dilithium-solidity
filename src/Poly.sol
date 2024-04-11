@@ -152,6 +152,24 @@ library Polynomial {
         }
     }
 
+    function chknorm(Poly memory a, int32 b) public pure returns (bool) {
+        int32 t;
+        if (b > (Q_I32 - 1) / 8) {
+            return true;
+        }
+
+        for (uint256 i = 0; i < N; ++i) {
+            int32 ai = a.coeffs[i];
+            t = ai >> 31;
+            t = ai - (t & 2 * ai);
+            if (t >= b) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     function pack_w1(Poly memory a) public pure returns (bytes memory) {
         // if if GAMMA2 == (Q - 1) / 88
         bytes memory r = new bytes(POLYW1_PACKEDBYTES);
@@ -173,21 +191,24 @@ library Polynomial {
         return r;
     }
 
-    function chknorm(Poly memory a, int32 b) public pure returns (bool) {
-        int32 t;
-        if (b > (Q_I32 - 1) / 8) {
-            return true;
+    function pack_t1(Poly memory a) public pure returns (bytes memory) {
+        bytes memory r = new bytes(POLYT1_PACKEDBYTES);
+        for (uint256 i = 0; i < N / 4; ++i) {
+            r[5 * i + 0] = bytes1(uint8(uint32(a.coeffs[4 * i + 0] >> 0)));
+            r[5 * i + 1] = bytes1(uint8(uint32((a.coeffs[4 * i + 0] >> 8) | (a.coeffs[4 * i + 1] << 2))));
+            r[5 * i + 2] = bytes1(uint8(uint32((a.coeffs[4 * i + 1] >> 6) | (a.coeffs[4 * i + 2] << 4))));
+            r[5 * i + 3] = bytes1(uint8(uint32((a.coeffs[4 * i + 2] >> 4) | (a.coeffs[4 * i + 3] << 6))));
+            r[5 * i + 4] = bytes1(uint8(uint32(a.coeffs[4 * i + 3] >> 2)));
         }
+        return r;
+    }
 
-        for (uint256 i = 0; i < N; ++i) {
-            int32 ai = a.coeffs[i];
-            t = ai >> 31;
-            t = ai - (t & 2 * ai);
-            if (t >= b) {
-                return true;
-            }
+    function unpack_t1(bytes memory a) public pure returns (Poly memory r) {
+        for (uint256 i = 0; i < N / 4; ++i) {
+            r.coeffs[4 * i + 0] = int32(uint32(uint8(a[5 * i + 0])) | (uint32((uint8(a[5 * i + 1]))) << 8) & 0x3FF);
+            r.coeffs[4 * i + 1] = int32((uint32(uint8(a[5 * i + 1])) >> 2) | (uint32(uint8(a[5 * i + 2])) << 6) & 0x3FF);
+            r.coeffs[4 * i + 2] = int32((uint32(uint8(a[5 * i + 2])) >> 4) | (uint32(uint8(a[5 * i + 3])) << 4) & 0x3FF);
+            r.coeffs[4 * i + 3] = int32((uint32(uint8(a[5 * i + 3])) >> 6) | (uint32(uint8(a[5 * i + 4])) << 2) & 0x3FF);
         }
-
-        return false;
     }
 }

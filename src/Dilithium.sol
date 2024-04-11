@@ -5,12 +5,14 @@ import "./Constants.sol";
 import "./Poly.sol";
 import "./PolyVec.sol";
 import "./Symmetric.sol";
+import "./Packing.sol";
 
 library Dilithium {
     using Polynomial for Polynomial.Poly;
     using PolynomialVector for PolynomialVector.PolyVecK;
     using PolynomialVector for PolynomialVector.PolyVecL;
     using Stream for Stream.State;
+    using Packing for PublicKey;
 
     struct PublicKey {
         uint256 rho;
@@ -30,10 +32,7 @@ library Dilithium {
     }
 
     function verify(Signature memory sig, PublicKey memory pk, bytes32 m) public pure returns (bool) {
-        Stream.State memory mustate = Stream.empty();
-        mustate.absorb(abi.encode(pk));
-        mustate.absorb(abi.encodePacked(m));
-        bytes memory mu = mustate.squeeze_bytes(CRHBYTES);
+        bytes32 mu = keccak256(bytes.concat(keccak256(pk.pack()), m));
 
         if (sig.z.chknorm(int32(int256(GAMMA1 - BETA)))) {
             return false;
@@ -56,12 +55,8 @@ library Dilithium {
         w1.use_hint(sig.h);
         bytes memory buf = w1.pack_w1();
 
-        Stream.State memory cstate = Stream.empty();
-        cstate.absorb(mu);
-        cstate.absorb(buf);
-        bytes memory c2b = cstate.squeeze_bytes(32);
-        uint256 c2us = uint256(bytes32(c2b));
+        uint256 c2 = uint256(keccak256(bytes.concat(mu, buf)));
 
-        return c2us == sig.c;
+        return c2 == sig.c;
     }
 }
