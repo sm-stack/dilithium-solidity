@@ -211,4 +211,34 @@ library Polynomial {
             r.coeffs[4 * i + 3] = int32((uint32(uint8(a[5 * i + 3])) >> 6) | (uint32(uint8(a[5 * i + 4])) << 2) & 0x3FF);
         }
     }
+
+    function unpack_z(bytes memory a) public pure returns (Poly memory r) {
+        // if GAMMA1 == 1 << 17
+        for (uint256 i = 0; i < N / 4; ++i) {
+            r.coeffs[4 * i + 0] = int32(uint32(uint8(a[9 * i + 0])));
+            r.coeffs[4 * i + 0] |= int32(uint32(uint8(a[9 * i + 1]))) << 8;
+            r.coeffs[4 * i + 0] |= int32(uint32(uint8(a[9 * i + 2]))) << 16;
+            r.coeffs[4 * i + 0] &= 0x3FFFF;
+
+            r.coeffs[4 * i + 1] = int32(uint32(uint8(a[9 * i + 2]) >> 2));
+            r.coeffs[4 * i + 1] |= int32(uint32(uint8(a[9 * i + 3]))) << 6;
+            r.coeffs[4 * i + 1] |= int32(uint32(uint8(a[9 * i + 4]))) << 14;
+            r.coeffs[4 * i + 1] &= 0x3FFFF;
+
+            r.coeffs[4 * i + 2] = int32(uint32(uint8(a[9 * i + 4]) >> 4));
+            r.coeffs[4 * i + 2] |= int32(uint32(uint8(a[9 * i + 5]))) << 4;
+            r.coeffs[4 * i + 2] |= int32(uint32(uint8(a[9 * i + 6]))) << 12;
+            r.coeffs[4 * i + 2] &= 0x3FFFF;
+
+            r.coeffs[4 * i + 3] = int32(uint32(uint8(a[9 * i + 6]) >> 6));
+            r.coeffs[4 * i + 3] |= int32(uint32(uint8(a[9 * i + 7]))) << 2;
+            r.coeffs[4 * i + 3] |= int32(uint32(uint8(a[9 * i + 8]))) << 10;
+            r.coeffs[4 * i + 3] &= 0x3FFFF;
+
+            r.coeffs[4 * i + 0] = GAMMA1_I32 - r.coeffs[4 * i + 0];
+            r.coeffs[4 * i + 1] = GAMMA1_I32 - r.coeffs[4 * i + 1];
+            r.coeffs[4 * i + 2] = GAMMA1_I32 - r.coeffs[4 * i + 2];
+            r.coeffs[4 * i + 3] = GAMMA1_I32 - r.coeffs[4 * i + 3];
+        }
+    }
 }
