@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.25;
 
+import "forge-std/console2.sol";
 import "./Constants.sol";
 import "./Dilithium.sol";
 import "./Poly.sol";
@@ -19,7 +20,7 @@ library Packing {
     }
 
     function unpack_pk(bytes memory _pk) public pure returns (Dilithium.PublicKey memory pk) {
-        bytes memory _rho;
+        bytes memory _rho = new bytes(32);
         for (uint256 i = 0; i < 32; i++) {
             _rho[i] = _pk[i];
         }
@@ -33,8 +34,8 @@ library Packing {
         }
     }
 
-    function unpack_sig(bytes memory _sig) public pure returns (Dilithium.Signature memory sig) {
-        bytes memory _c;
+    function unpack_sig(bytes memory _sig) public view returns (Dilithium.Signature memory sig) {
+        bytes memory _c = new bytes(32);
         for (uint256 i = 0; i < 32; ++i) {
             _c[i] = _sig[i];
         }

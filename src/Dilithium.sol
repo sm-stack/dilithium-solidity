@@ -31,7 +31,7 @@ library Dilithium {
         PolynomialVector.PolyVecK h;
     }
 
-    function verify(Signature memory sig, PublicKey memory pk, bytes32 m) public pure returns (bool) {
+    function verify(Signature memory sig, PublicKey memory pk, bytes memory m) public pure returns (bool) {
         bytes32 mu = keccak256(bytes.concat(keccak256(pk.pack()), m));
 
         if (sig.z.chknorm(int32(int256(GAMMA1 - BETA)))) {
