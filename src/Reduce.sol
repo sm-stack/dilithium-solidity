@@ -4,12 +4,12 @@ pragma solidity 0.8.25;
 import "./Constants.sol";
 
 function mreduce64(int64 a) pure returns (int32) {
+    int64 t;
     unchecked {
-        int64 t;
         t = int64(int32(a) * QINV);
-        t = (a - t * Q) >> 32;
-        return int32(t);
     }
+    t = (a - t * Q) >> 32;
+    return int32(t);
 }
 
 function reduce32(int32 a) pure returns (int32) {

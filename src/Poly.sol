@@ -110,11 +110,12 @@ library Polynomial {
         }
     }
 
-    function challenge(uint256 seed) public pure returns (Poly memory a) {
+    function challenge(bytes32 seed) public pure returns (Poly memory a) {
         uint64 signs = 0;
 
         Stream.State memory state = Stream.empty();
-        state.absorb(abi.encodePacked(seed));
+        state.absorb(bytes.concat(seed));
+
         bytes memory buf = state.s256_squeeze_block();
 
         for (uint64 i = 0; i < 8; ++i) {
@@ -125,7 +126,7 @@ library Polynomial {
         uint256 b;
 
         for (uint256 i = N - TAU; i < N; ++i) {
-            while (b <= 1) {
+            while (b > i) {
                 if (pos >= SHAKE256_RATE) {
                     buf = state.s256_squeeze_block();
                     pos = 0;

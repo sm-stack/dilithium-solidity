@@ -34,12 +34,12 @@ library Packing {
         }
     }
 
-    function unpack_sig(bytes memory _sig) public view returns (Dilithium.Signature memory sig) {
+    function unpack_sig(bytes memory _sig) public pure returns (Dilithium.Signature memory sig) {
         bytes memory _c = new bytes(32);
         for (uint256 i = 0; i < 32; ++i) {
             _c[i] = _sig[i];
         }
-        sig.c = uint256(bytes32(_c));
+        sig.c = bytes32(_c);
 
         uint256 index = 32;
 

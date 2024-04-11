@@ -19,7 +19,7 @@ library Stream {
     }
 
     function squeeze_bytes(State memory st, uint256 len) public pure returns (bytes memory) {
-        bytes memory buf;
+        bytes memory buf = new bytes(0);
         while (len > 0) {
             if (len < 32) {
                 bytes memory left = new bytes(len);

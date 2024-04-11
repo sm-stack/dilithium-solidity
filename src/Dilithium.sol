@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.25;
 
+import "forge-std/console2.sol";
 import "./Constants.sol";
 import "./Poly.sol";
 import "./PolyVec.sol";
@@ -26,13 +27,14 @@ library Dilithium {
     }
 
     struct Signature {
-        uint256 c;
+        bytes32 c;
         PolynomialVector.PolyVecL z;
         PolynomialVector.PolyVecK h;
     }
 
-    function verify(Signature memory sig, PublicKey memory pk, bytes memory m) public pure returns (bool) {
-        bytes32 mu = keccak256(bytes.concat(keccak256(pk.pack()), m));
+    function verify(Signature memory sig, PublicKey memory pk, bytes memory m) public view returns (bool) {
+        bytes32 mul = keccak256(bytes.concat(keccak256(pk.pack()), m));
+        bytes32 mur = keccak256(bytes.concat(mul));
 
         if (sig.z.chknorm(int32(int256(GAMMA1 - BETA)))) {
             return false;
@@ -55,7 +57,7 @@ library Dilithium {
         w1.use_hint(sig.h);
         bytes memory buf = w1.pack_w1();
 
-        uint256 c2 = uint256(keccak256(bytes.concat(mu, buf)));
+        bytes32 c2 = keccak256(bytes.concat(mul, mur, buf));
 
         return c2 == sig.c;
     }
