@@ -10,7 +10,7 @@ import "../src/Packing.sol";
 contract DilithiumGasTracker {
     function verify(Dilithium.Signature memory sig, Dilithium.PublicKey memory pk, bytes memory m)
         public
-        view
+        pure
         returns (bool)
     {
         return Dilithium.verify(sig, pk, m);
@@ -40,6 +40,6 @@ contract DilithiumTest is Test {
         bytes memory m = hex"48656c6c6f"; // Hello
 
         bool _result = tracker.verify(sig, pk, m);
-        console2.log("result", _result);
+        assert(_result);
     }
 }

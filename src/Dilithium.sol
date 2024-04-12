@@ -32,29 +32,28 @@ library Dilithium {
         PolynomialVector.PolyVecK h;
     }
 
-    function verify(Signature memory sig, PublicKey memory pk, bytes memory m) public view returns (bool) {
+    function verify(Signature memory sig, PublicKey memory pk, bytes memory m) public pure returns (bool) {
         bytes32 mul = keccak256(bytes.concat(keccak256(pk.pack()), m));
         bytes32 mur = keccak256(bytes.concat(mul));
 
         if (sig.z.chknorm(int32(int256(GAMMA1 - BETA)))) {
             return false;
         }
-
         Polynomial.Poly memory cp = Polynomial.challenge(sig.c);
         PolynomialVector.PolyVecL[K] memory mat = PolynomialVector.matrix_expand(pk.rho);
-        sig.z.ntt();
+        sig.z = sig.z.ntt();
         PolynomialVector.PolyVecK memory w1 = PolynomialVector.matrix_mpointwise_empty(mat, sig.z);
-        cp.ntt();
-        pk.t1.shiftl();
-        pk.t1.ntt();
+        cp = cp.ntt();
+        pk.t1 = pk.t1.shiftl();
+        pk.t1 = pk.t1.ntt();
         PolynomialVector.PolyVecK memory t1_2 = pk.t1.clone();
-        pk.t1.poly_mpointwise(cp, t1_2);
-        w1.sub(pk.t1);
-        w1.reduce();
-        w1.invntt();
+        pk.t1 = pk.t1.poly_mpointwise(cp, t1_2);
+        w1 = w1.sub(pk.t1);
+        w1 = w1.reduce();
+        w1 = w1.invntt();
 
-        w1.caddq();
-        w1.use_hint(sig.h);
+        w1 = w1.caddq();
+        w1 = w1.use_hint(sig.h);
         bytes memory buf = w1.pack_w1();
 
         bytes32 c2 = keccak256(bytes.concat(mul, mur, buf));

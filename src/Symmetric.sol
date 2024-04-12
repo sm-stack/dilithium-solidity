@@ -14,12 +14,13 @@ library Stream {
         return State(keccak256(bytes.concat(bytes32(seed), bytes32(uint256(nonce)))));
     }
 
-    function absorb(State memory st, bytes memory input) public pure {
+    function absorb(State memory st, bytes memory input) public pure returns (State memory) {
         st.state = keccak256(bytes.concat(st.state, input));
+        return st;
     }
 
-    function squeeze_bytes(State memory st, uint256 len) public pure returns (bytes memory) {
-        bytes memory buf = new bytes(0);
+    function squeeze_bytes(State memory st, uint256 len) public pure returns (State memory, bytes memory) {
+        bytes memory buf;
         while (len > 0) {
             if (len < 32) {
                 bytes memory left = new bytes(len);
@@ -34,26 +35,26 @@ library Stream {
             }
             st.state = keccak256(bytes.concat(st.state));
         }
-        return buf;
+        return (st, buf);
     }
 
     // n block = n * SHAKE128_RATE bytes
-    function s128_squeeze_nblocks(State memory st, uint256 nblocks) public pure returns (bytes memory) {
+    function s128_squeeze_nblocks(State memory st, uint256 nblocks) public pure returns (State memory, bytes memory) {
         return squeeze_bytes(st, SHAKE128_RATE * nblocks);
     }
 
     // 1 block = SHAKE128_RATE bytes
-    function s128_squeeze_block(State memory st) public pure returns (bytes memory) {
+    function s128_squeeze_block(State memory st) public pure returns (State memory, bytes memory) {
         return squeeze_bytes(st, SHAKE128_RATE);
     }
 
     // n block = n * SHAKE256_RATE bytes
-    function s256_squeeze_nblocks(State memory st, uint256 nblocks) public pure returns (bytes memory) {
+    function s256_squeeze_nblocks(State memory st, uint256 nblocks) public pure returns (State memory, bytes memory) {
         return squeeze_bytes(st, SHAKE256_RATE * nblocks);
     }
 
     // 1 block = SHAKE256_RATE bytes
-    function s256_squeeze_block(State memory st) public pure returns (bytes memory) {
+    function s256_squeeze_block(State memory st) public pure returns (State memory, bytes memory) {
         return squeeze_bytes(st, SHAKE256_RATE);
     }
 }
