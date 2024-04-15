@@ -53,10 +53,9 @@ library Dilithium {
         }
         Polynomial.Poly memory cp = Polynomial.challenge(sig.c);
         sig.z = sig.z.ntt();
-        PolynomialVector.PolyVecK memory w1 = PolynomialVector.matrix_mpointwise_empty(pk.mat, sig.z);
+        PolynomialVector.PolyVecK memory w1 = PolynomialVector.matrix_mpointwise(pk.mat, sig.z);
         cp = cp.ntt();
-        PolynomialVector.PolyVecK memory t1_2 = pk.t1.clone();
-        pk.t1 = pk.t1.poly_mpointwise(cp, t1_2);
+        pk.t1 = PolynomialVector.poly_mpointwise(cp, pk.t1);
         w1 = w1.sub(pk.t1);
         w1 = w1.reduce();
         w1 = w1.invntt();
@@ -80,12 +79,11 @@ library Dilithium {
         Polynomial.Poly memory cp = Polynomial.challenge(sig.c);
         PolynomialVector.PolyVecL[K] memory mat = PolynomialVector.matrix_expand(pk.rho);
         sig.z = sig.z.ntt();
-        PolynomialVector.PolyVecK memory w1 = PolynomialVector.matrix_mpointwise_empty(mat, sig.z);
+        PolynomialVector.PolyVecK memory w1 = PolynomialVector.matrix_mpointwise(mat, sig.z);
         cp = cp.ntt();
         pk.t1 = pk.t1.shiftl();
         pk.t1 = pk.t1.ntt();
-        PolynomialVector.PolyVecK memory t1_2 = pk.t1.clone();
-        pk.t1 = pk.t1.poly_mpointwise(cp, t1_2);
+        pk.t1 = PolynomialVector.poly_mpointwise(cp, pk.t1);
         w1 = w1.sub(pk.t1);
         w1 = w1.reduce();
         w1 = w1.invntt();

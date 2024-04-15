@@ -4,6 +4,7 @@ pragma solidity 0.8.25;
 uint256 constant N = 256;
 uint256 constant N_256 = 32; // N / 8
 uint256 constant D = 13;
+uint32 constant D_U32 = 13;
 
 uint256 constant CRHBYTES = 64;
 uint256 constant SEEDBYTES = 32;

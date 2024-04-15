@@ -28,121 +28,130 @@ library PolynomialVector {
     }
 
     function ntt(PolyVecK memory a) public pure returns (PolyVecK memory) {
-        for (uint256 i = 0; i < K; ++i) {
-            a.polys[i] = a.polys[i].ntt();
-        }
+        // 0..K
+        a.polys[0] = a.polys[0].ntt();
+        a.polys[1] = a.polys[1].ntt();
+        a.polys[2] = a.polys[2].ntt();
+        a.polys[3] = a.polys[3].ntt();
         return a;
     }
 
     function ntt(PolyVecL memory a) public pure returns (PolyVecL memory) {
-        for (uint256 i = 0; i < L; ++i) {
-            a.polys[i] = a.polys[i].ntt();
-        }
+        // 0..L
+        a.polys[0] = a.polys[0].ntt();
+        a.polys[1] = a.polys[1].ntt();
+        a.polys[2] = a.polys[2].ntt();
+        a.polys[3] = a.polys[3].ntt();
         return a;
     }
 
     function invntt(PolyVecK memory a) public pure returns (PolyVecK memory) {
-        for (uint256 i = 0; i < K; ++i) {
-            a.polys[i] = a.polys[i].invntt();
-        }
+        // 0..K
+        a.polys[0] = a.polys[0].invntt();
+        a.polys[1] = a.polys[1].invntt();
+        a.polys[2] = a.polys[2].invntt();
+        a.polys[3] = a.polys[3].invntt();
         return a;
     }
 
     function invntt(PolyVecL memory a) public pure returns (PolyVecL memory) {
-        for (uint256 i = 0; i < L; ++i) {
-            a.polys[i] = a.polys[i].invntt();
-        }
+        // 0..L
+        a.polys[0] = a.polys[0].invntt();
+        a.polys[1] = a.polys[1].invntt();
+        a.polys[2] = a.polys[2].invntt();
+        a.polys[3] = a.polys[3].invntt();
         return a;
     }
 
     function matrix_expand(uint256 rho) public pure returns (PolyVecL[K] memory m) {
-        for (uint256 i = 0; i < K; ++i) {
-            for (uint256 j = 0; j < L; ++j) {
-                m[i].polys[j] = m[i].polys[j].uniform(rho, uint16((i << 8) + j));
-            }
-        }
+        m[0].polys[0] = m[0].polys[0].uniform(rho, uint16((0 << 8) + 0));
+        m[0].polys[1] = m[0].polys[1].uniform(rho, uint16((0 << 8) + 1));
+        m[0].polys[2] = m[0].polys[2].uniform(rho, uint16((0 << 8) + 2));
+        m[0].polys[3] = m[0].polys[3].uniform(rho, uint16((0 << 8) + 3));
+        m[1].polys[0] = m[1].polys[0].uniform(rho, uint16((1 << 8) + 0));
+        m[1].polys[1] = m[1].polys[1].uniform(rho, uint16((1 << 8) + 1));
+        m[1].polys[2] = m[1].polys[2].uniform(rho, uint16((1 << 8) + 2));
+        m[1].polys[3] = m[1].polys[3].uniform(rho, uint16((1 << 8) + 3));
+        m[2].polys[0] = m[2].polys[0].uniform(rho, uint16((2 << 8) + 0));
+        m[2].polys[1] = m[2].polys[1].uniform(rho, uint16((2 << 8) + 1));
+        m[2].polys[2] = m[2].polys[2].uniform(rho, uint16((2 << 8) + 2));
+        m[2].polys[3] = m[2].polys[3].uniform(rho, uint16((2 << 8) + 3));
+        m[3].polys[0] = m[3].polys[0].uniform(rho, uint16((3 << 8) + 0));
+        m[3].polys[1] = m[3].polys[1].uniform(rho, uint16((3 << 8) + 1));
+        m[3].polys[2] = m[3].polys[2].uniform(rho, uint16((3 << 8) + 2));
+        m[3].polys[3] = m[3].polys[3].uniform(rho, uint16((3 << 8) + 3));
     }
 
-    // Mutates w
-    function mpointwise_acc(Polynomial.Poly memory w, PolyVecL memory u, PolyVecL memory v)
-        public
-        pure
-        returns (Polynomial.Poly memory)
-    {
-        Polynomial.Poly memory t;
-        w = w.mpointwise(u.polys[0], v.polys[0]);
-        for (uint256 i = 1; i < L; ++i) {
-            t = t.mpointwise(u.polys[i], v.polys[i]);
-            w = w.add(t);
-        }
+    function mpointwise_acc(PolyVecL memory u, PolyVecL memory v) public pure returns (Polynomial.Poly memory w) {
+        // 0
+        w = u.polys[0].mpointwise(v.polys[0]);
+        // 1..L
+        w = w.add(u.polys[1].mpointwise(v.polys[1]));
+        w = w.add(u.polys[2].mpointwise(v.polys[2]));
+        w = w.add(u.polys[3].mpointwise(v.polys[3]));
         return w;
     }
 
-    // Mutates t
-    function matrix_mpointwise(PolyVecK memory t, PolyVecL[K] memory mat, PolyVecL memory v)
-        public
-        pure
-        returns (PolyVecK memory)
-    {
-        for (uint256 i = 0; i < K; ++i) {
-            t.polys[i] = mpointwise_acc(t.polys[i], mat[i], v);
-        }
+    function matrix_mpointwise(PolyVecL[K] memory mat, PolyVecL memory v) public pure returns (PolyVecK memory t) {
+        // 0..K
+        t.polys[0] = mpointwise_acc(mat[0], v);
+        t.polys[1] = mpointwise_acc(mat[1], v);
+        t.polys[2] = mpointwise_acc(mat[2], v);
+        t.polys[3] = mpointwise_acc(mat[3], v);
         return t;
     }
 
-    function matrix_mpointwise_empty(PolyVecL[K] memory mat, PolyVecL memory v)
-        public
-        pure
-        returns (PolyVecK memory t)
-    {
-        for (uint256 i = 0; i < K; ++i) {
-            t.polys[i] = mpointwise_acc(t.polys[i], mat[i], v);
-        }
-    }
-
-    function poly_mpointwise(PolyVecK memory r, Polynomial.Poly memory a, PolyVecK memory v)
-        public
-        pure
-        returns (PolyVecK memory)
-    {
-        for (uint256 i = 0; i < K; ++i) {
-            r.polys[i] = r.polys[i].mpointwise(a, v.polys[i]);
-        }
+    function poly_mpointwise(Polynomial.Poly memory a, PolyVecK memory v) public pure returns (PolyVecK memory r) {
+        // 0..K
+        r.polys[0] = a.mpointwise(v.polys[0]);
+        r.polys[1] = a.mpointwise(v.polys[1]);
+        r.polys[2] = a.mpointwise(v.polys[2]);
+        r.polys[3] = a.mpointwise(v.polys[3]);
         return r;
     }
 
     function shiftl(PolyVecK memory a) public pure returns (PolyVecK memory) {
-        for (uint256 i = 0; i < K; ++i) {
-            a.polys[i] = a.polys[i].shiftl();
-        }
+        // 0..K
+        a.polys[0] = a.polys[0].shiftl();
+        a.polys[1] = a.polys[1].shiftl();
+        a.polys[2] = a.polys[2].shiftl();
+        a.polys[3] = a.polys[3].shiftl();
         return a;
     }
 
     function sub(PolyVecK memory a, PolyVecK memory b) public pure returns (PolyVecK memory) {
-        for (uint256 i = 0; i < K; ++i) {
-            a.polys[i] = a.polys[i].sub(b.polys[i]);
-        }
+        // 0..K
+        a.polys[0] = a.polys[0].sub(b.polys[0]);
+        a.polys[1] = a.polys[1].sub(b.polys[1]);
+        a.polys[2] = a.polys[2].sub(b.polys[2]);
+        a.polys[3] = a.polys[3].sub(b.polys[3]);
         return a;
     }
 
     function reduce(PolyVecK memory a) public pure returns (PolyVecK memory) {
-        for (uint256 i = 0; i < K; ++i) {
-            a.polys[i] = a.polys[i].reduce();
-        }
+        // 0..K
+        a.polys[0] = a.polys[0].reduce();
+        a.polys[1] = a.polys[1].reduce();
+        a.polys[2] = a.polys[2].reduce();
+        a.polys[3] = a.polys[3].reduce();
         return a;
     }
 
     function caddq(PolyVecK memory a) public pure returns (PolyVecK memory) {
-        for (uint256 i = 0; i < K; ++i) {
-            a.polys[i] = a.polys[i].caddq();
-        }
+        // 0..K
+        a.polys[0] = a.polys[0].caddq();
+        a.polys[1] = a.polys[1].caddq();
+        a.polys[2] = a.polys[2].caddq();
+        a.polys[3] = a.polys[3].caddq();
         return a;
     }
 
     function use_hint(PolyVecK memory a, PolyVecK memory b) public pure returns (PolyVecK memory) {
-        for (uint256 i = 0; i < K; ++i) {
-            a.polys[i] = a.polys[i].use_hint(b.polys[i]);
-        }
+        // 0..K
+        a.polys[0] = a.polys[0].use_hint(b.polys[0]);
+        a.polys[1] = a.polys[1].use_hint(b.polys[1]);
+        a.polys[2] = a.polys[2].use_hint(b.polys[2]);
+        a.polys[3] = a.polys[3].use_hint(b.polys[3]);
         return a;
     }
 
