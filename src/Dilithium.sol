@@ -21,15 +21,53 @@ library Dilithium {
     }
 
     struct ExpandedPublicKey {
-        PolynomialVector.PolyVecL[K] rho;
+        bytes32 packed;
+        PolynomialVector.PolyVecL[K] mat;
         PolynomialVector.PolyVecK t1;
-        PolynomialVector.PolyVecK t1_2;
     }
 
     struct Signature {
         bytes32 c;
         PolynomialVector.PolyVecL z;
         PolynomialVector.PolyVecK h;
+    }
+
+    function expand(PublicKey memory pk) public pure returns (ExpandedPublicKey memory epk) {
+        epk.packed = keccak256(pk.pack());
+        epk.t1 = pk.t1.clone();
+        epk.t1 = epk.t1.shiftl();
+        epk.t1 = epk.t1.ntt();
+        epk.mat = PolynomialVector.matrix_expand(pk.rho);
+    }
+
+    function verifyExpanded(Signature memory sig, ExpandedPublicKey memory pk, bytes memory m)
+        public
+        pure
+        returns (bool)
+    {
+        bytes32 mul = keccak256(bytes.concat(pk.packed, m));
+        bytes32 mur = keccak256(bytes.concat(mul));
+
+        if (sig.z.chknorm(int32(int256(GAMMA1 - BETA)))) {
+            return false;
+        }
+        Polynomial.Poly memory cp = Polynomial.challenge(sig.c);
+        sig.z = sig.z.ntt();
+        PolynomialVector.PolyVecK memory w1 = PolynomialVector.matrix_mpointwise_empty(pk.mat, sig.z);
+        cp = cp.ntt();
+        PolynomialVector.PolyVecK memory t1_2 = pk.t1.clone();
+        pk.t1 = pk.t1.poly_mpointwise(cp, t1_2);
+        w1 = w1.sub(pk.t1);
+        w1 = w1.reduce();
+        w1 = w1.invntt();
+
+        w1 = w1.caddq();
+        w1 = w1.use_hint(sig.h);
+        bytes memory buf = w1.pack_w1();
+
+        bytes32 c2 = keccak256(bytes.concat(mul, mur, buf));
+
+        return c2 == sig.c;
     }
 
     function verify(Signature memory sig, PublicKey memory pk, bytes memory m) public pure returns (bool) {
