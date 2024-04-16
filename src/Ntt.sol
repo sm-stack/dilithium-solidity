@@ -5,7 +5,7 @@ import "forge-std/console2.sol";
 import "./Constants.sol";
 import "./Reduce.sol";
 
-function invntt(int32[N] memory a) pure {
+function invntt(int32[N] memory a) pure returns (int32[N] memory) {
     unchecked {
         {
             int32 t = a[0];
@@ -10504,9 +10504,11 @@ function invntt(int32[N] memory a) pure {
             a[255] = int32((tr - tri * Q) >> 32);
         }
     }
+
+    return a;
 }
 
-function ntt(int32[N] memory a) pure {
+function ntt(int32[N] memory a) pure returns (int32[N] memory) {
     unchecked {
         {
             int64 tr = 25847 * int64(a[128]);
@@ -17677,4 +17679,6 @@ function ntt(int32[N] memory a) pure {
             a[254] += t;
         }
     }
+    
+    return a;
 }

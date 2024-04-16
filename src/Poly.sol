@@ -2878,12 +2878,12 @@ library Polynomial {
     }
 
     function ntt(Poly memory a) public pure returns (Poly memory) {
-        ntt_internal(a.coeffs);
+        a.coeffs = ntt_internal(a.coeffs);
         return a;
     }
 
     function invntt(Poly memory a) public pure returns (Poly memory) {
-        invntt_internal(a.coeffs);
+        a.coeffs = invntt_internal(a.coeffs);
         return a;
     }
 
