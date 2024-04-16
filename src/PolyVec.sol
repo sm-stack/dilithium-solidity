@@ -3,6 +3,7 @@ pragma solidity 0.8.25;
 
 import "./Constants.sol";
 import "./Poly.sol";
+import {ntt as ntt_internal, invntt as invntt_internal} from "./Ntt.sol";
 
 library PolynomialVector {
     using Polynomial for Polynomial.Poly;
@@ -27,39 +28,30 @@ library PolynomialVector {
         }
     }
 
-    function ntt(PolyVecK memory a) public pure returns (PolyVecK memory) {
-        // 0..K
-        a.polys[0] = a.polys[0].ntt();
-        a.polys[1] = a.polys[1].ntt();
-        a.polys[2] = a.polys[2].ntt();
-        a.polys[3] = a.polys[3].ntt();
+    function ntt(PolyVecL memory a) public pure returns (PolyVecL memory) {
+        // 0..L
+        a.polys[0].coeffs = ntt_internal(a.polys[0].coeffs);
+        a.polys[1].coeffs = ntt_internal(a.polys[1].coeffs);
+        a.polys[2].coeffs = ntt_internal(a.polys[2].coeffs);
+        a.polys[3].coeffs = ntt_internal(a.polys[3].coeffs);
         return a;
     }
 
-    function ntt(PolyVecL memory a) public pure returns (PolyVecL memory) {
+    function ntt(PolyVecK memory a) public pure returns (PolyVecK memory) {
         // 0..L
-        a.polys[0] = a.polys[0].ntt();
-        a.polys[1] = a.polys[1].ntt();
-        a.polys[2] = a.polys[2].ntt();
-        a.polys[3] = a.polys[3].ntt();
+        a.polys[0].coeffs = ntt_internal(a.polys[0].coeffs);
+        a.polys[1].coeffs = ntt_internal(a.polys[1].coeffs);
+        a.polys[2].coeffs = ntt_internal(a.polys[2].coeffs);
+        a.polys[3].coeffs = ntt_internal(a.polys[3].coeffs);
         return a;
     }
 
     function invntt(PolyVecK memory a) public pure returns (PolyVecK memory) {
         // 0..K
-        a.polys[0] = a.polys[0].invntt();
-        a.polys[1] = a.polys[1].invntt();
-        a.polys[2] = a.polys[2].invntt();
-        a.polys[3] = a.polys[3].invntt();
-        return a;
-    }
-
-    function invntt(PolyVecL memory a) public pure returns (PolyVecL memory) {
-        // 0..L
-        a.polys[0] = a.polys[0].invntt();
-        a.polys[1] = a.polys[1].invntt();
-        a.polys[2] = a.polys[2].invntt();
-        a.polys[3] = a.polys[3].invntt();
+        a.polys[0].coeffs = invntt_internal(a.polys[0].coeffs);
+        a.polys[1].coeffs = invntt_internal(a.polys[1].coeffs);
+        a.polys[2].coeffs = invntt_internal(a.polys[2].coeffs);
+        a.polys[3].coeffs = invntt_internal(a.polys[3].coeffs);
         return a;
     }
 

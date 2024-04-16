@@ -2380,11 +2380,6 @@ library Polynomial {
         return a;
     }
 
-    function invntt(Poly memory a) public pure returns (Poly memory) {
-        a.coeffs = invntt_internal(a.coeffs);
-        return a;
-    }
-
     uint256 constant POLY_UNIFORM_NBLOCKS = (768 + STREAM128_BLOCKBYTES - 1) / STREAM128_BLOCKBYTES;
 
     function uniform(Poly memory a, uint256 seed, uint16 nonce) public pure returns (Poly memory) {
