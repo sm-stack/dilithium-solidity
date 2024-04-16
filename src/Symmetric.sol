@@ -20,22 +20,24 @@ library Stream {
     }
 
     function squeeze_bytes(State memory st, uint256 len) public pure returns (State memory, bytes memory) {
-        bytes memory buf;
-        while (len > 0) {
-            if (len < 32) {
-                bytes memory left = new bytes(len);
-                for (uint256 i = 0; i < len; i++) {
-                    left[i] = st.state[i];
+        unchecked {
+            bytes memory buf;
+            while (len > 0) {
+                if (len < 32) {
+                    bytes memory left = new bytes(len);
+                    for (uint256 i = 0; i < len; i++) {
+                        left[i] = st.state[i];
+                    }
+                    buf = bytes.concat(buf, left);
+                    len = 0;
+                } else {
+                    buf = bytes.concat(buf, st.state);
+                    len -= 32;
                 }
-                buf = bytes.concat(buf, left);
-                len = 0;
-            } else {
-                buf = bytes.concat(buf, st.state);
-                len -= 32;
+                st.state = keccak256(bytes.concat(st.state));
             }
-            st.state = keccak256(bytes.concat(st.state));
+            return (st, buf);
         }
-        return (st, buf);
     }
 
     // n block = n * SHAKE128_RATE bytes

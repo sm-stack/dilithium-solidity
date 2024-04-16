@@ -7,24 +7,26 @@ function rej_uniform(int32[] memory a, uint256 len, bytes memory buf, uint256 bu
     pure
     returns (int32[] memory, uint256)
 {
-    uint256 ctr = 0;
-    uint256 pos = 0;
-    uint32 t = 0;
+    unchecked {
+        uint256 ctr = 0;
+        uint256 pos = 0;
+        uint32 t = 0;
 
-    while (ctr < len && pos + 3 <= buflen) {
-        t = uint32(uint8(buf[pos]));
-        pos += 1;
-        t |= uint32(uint8(buf[pos])) << 8;
-        pos += 1;
-        t |= uint32(uint8(buf[pos])) << 16;
-        pos += 1;
-        t &= 0x7FFFFF;
+        while (ctr < len && pos + 3 <= buflen) {
+            t = uint32(uint8(buf[pos]));
+            pos += 1;
+            t |= uint32(uint8(buf[pos])) << 8;
+            pos += 1;
+            t |= uint32(uint8(buf[pos])) << 16;
+            pos += 1;
+            t &= 0x7FFFFF;
 
-        if (t < Q_U32) {
-            a[ctr] = int32(t);
-            ctr += 1;
+            if (t < Q_U32) {
+                a[ctr] = int32(t);
+                ctr += 1;
+            }
         }
-    }
 
-    return (a, ctr);
+        return (a, ctr);
+    }
 }
