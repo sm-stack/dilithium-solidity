@@ -271,13 +271,13 @@ contract Ntt {
     function ntt(int32[N] memory a) public pure returns (int32[N] memory) {
         unchecked {
             int64[N] memory _zetas = zetas();
-            uint j;
-            uint k;
+            uint256 j;
+            uint256 k;
             int32 t;
             int64 zeta;
 
-            for (uint len = 128; len > 0; len >>= 1) {
-                uint start = 0;
+            for (uint256 len = 128; len > 0; len >>= 1) {
+                uint256 start = 0;
                 while (start < N) {
                     k += 1;
                     zeta = _zetas[k];

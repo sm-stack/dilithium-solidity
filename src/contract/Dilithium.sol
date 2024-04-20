@@ -5,11 +5,8 @@ import "../Constants.sol";
 import "./Packing.sol";
 import "./Poly.sol";
 import "./PolyVec.sol";
-import "../Symmetric.sol";
 
 contract Dilithium {
-    using Stream for Stream.State;
-
     Polynomial immutable _poly;
     PolynomialVector immutable _polyvec;
     Packing immutable _packing;

@@ -8,6 +8,7 @@ import "../src/contract/Ntt.sol";
 import "../src/contract/Poly.sol";
 import "../src/contract/PolyVec.sol";
 import "../src/contract/Packing.sol";
+import "../src/contract/Symmetric.sol";
 
 contract DilithiumTest is Test {
     Dilithium _dilithium;
@@ -16,11 +17,13 @@ contract DilithiumTest is Test {
     Polynomial _poly;
     PolynomialVector _polyVec;
     Packing _packing;
+    Stream _stream;
 
     function setUp() public {
         _ntt = new Ntt();
         _invntt = new Invntt();
-        _poly = new Polynomial(_ntt);
+        _stream = new Stream();
+        _poly = new Polynomial(_ntt, _stream);
         _polyVec = new PolynomialVector(_ntt, _invntt, _poly);
         _packing = new Packing(_poly);
         _dilithium = new Dilithium(_poly, _polyVec, _packing);

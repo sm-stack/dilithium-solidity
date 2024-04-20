@@ -3,18 +3,18 @@ pragma solidity 0.8.25;
 
 import "../Constants.sol";
 import "../Reduce.sol";
-import "../Symmetric.sol";
+import "./Symmetric.sol";
 import "../Sampler.sol";
 import {use_hint as use_hint_internal} from "../Rounding.sol";
 import "./Ntt.sol";
 
 contract Polynomial {
-    using Stream for Stream.State;
-
     Ntt immutable _ntt;
+    Stream immutable _stream;
 
-    constructor(Ntt __ntt) {
+    constructor(Ntt __ntt, Stream __stream) {
         _ntt = __ntt;
+        _stream = __stream;
     }
 
     struct Poly {
@@ -82,13 +82,13 @@ contract Polynomial {
 
     uint256 constant POLY_UNIFORM_NBLOCKS = (768 + STREAM128_BLOCKBYTES - 1) / STREAM128_BLOCKBYTES;
 
-    function uniform(Poly memory a, uint256 seed, uint16 nonce) public pure returns (Poly memory) {
+    function uniform(Poly memory a, uint256 seed, uint16 nonce) public view returns (Poly memory) {
         unchecked {
             uint256 buflen = POLY_UNIFORM_NBLOCKS * STREAM128_BLOCKBYTES;
 
-            Stream.State memory state = Stream.init(seed, nonce);
+            Stream.State memory state = _stream.init(seed, nonce);
             bytes memory buf;
-            (state, buf) = state.s128_squeeze_nblocks(POLY_UNIFORM_NBLOCKS);
+            (state, buf) = _stream.s128_squeeze_nblocks(state, POLY_UNIFORM_NBLOCKS);
 
             uint256 ctr;
             uint256 off;
@@ -112,7 +112,7 @@ contract Polynomial {
                 buflen = off + STREAM128_BLOCKBYTES;
                 {
                     bytes memory tmpbuf;
-                    (state, tmpbuf) = state.s128_squeeze_block();
+                    (state, tmpbuf) = _stream.s128_squeeze_block(state);
                     // buf[off..] = tmpbuf
                     for (uint256 i = 0; i < STREAM128_BLOCKBYTES; i++) {
                         buf[off + i] = tmpbuf[i];
@@ -134,15 +134,15 @@ contract Polynomial {
         }
     }
 
-    function challenge(bytes32 seed) public pure returns (Poly memory a) {
+    function challenge(bytes32 seed) public view returns (Poly memory a) {
         unchecked {
             uint64 signs = 0;
 
-            Stream.State memory state = Stream.empty();
-            state = state.absorb(bytes.concat(seed));
+            Stream.State memory state = _stream.empty();
+            state = _stream.absorb(state, bytes.concat(seed));
 
             bytes memory buf;
-            (state, buf) = state.s256_squeeze_block();
+            (state, buf) = _stream.s256_squeeze_block(state);
 
             for (uint64 i = 0; i < 8; ++i) {
                 signs |= uint64(uint8(buf[i])) << (8 * i);
@@ -154,7 +154,7 @@ contract Polynomial {
             for (uint256 i = N - TAU; i < N; ++i) {
                 while (true) {
                     if (pos >= SHAKE256_RATE) {
-                        (state, buf) = state.s256_squeeze_block();
+                        (state, buf) = _stream.s256_squeeze_block(state);
                         pos = 0;
                     }
                     b = uint256(uint8(buf[pos]));

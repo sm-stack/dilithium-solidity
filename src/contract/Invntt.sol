@@ -271,12 +271,12 @@ contract Invntt {
     function invntt(int32[N] memory a) public pure returns (int32[N] memory) {
         unchecked {
             int64[N] memory _zetas = zetas();
-            uint j;
-            uint k = 256;
+            uint256 j;
+            uint256 k = 256;
             int64 zeta;
 
-            for (uint len = 1; len < N; len <<= 1) {
-                uint start = 0;
+            for (uint256 len = 1; len < N; len <<= 1) {
+                uint256 start = 0;
                 while (start < N) {
                     k -= 1;
                     zeta = -_zetas[k];
@@ -292,7 +292,7 @@ contract Invntt {
                 }
             }
 
-            for (uint i = 0; i < N; i++) {
+            for (uint256 i = 0; i < N; i++) {
                 a[i] = mreduce64(F * int64(a[i]));
             }
 
