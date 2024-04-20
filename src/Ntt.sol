@@ -17679,6 +17679,6 @@ function ntt(int32[N] memory a) pure returns (int32[N] memory) {
             a[254] += t;
         }
     }
-    
+
     return a;
 }
